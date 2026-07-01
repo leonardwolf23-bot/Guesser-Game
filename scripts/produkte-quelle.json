@@ -1,0 +1,124 @@
+[
+  {
+    "datei": "ruegenwalder-bratwurst",
+    "suche": "rügenwalder vegetarische bratwurst",
+    "marke": "Rügenwalder",
+    "produkt": "Vegetarische Bratwurst"
+  },
+  {
+    "datei": "ruegenwalder-frikadellen",
+    "suche": "rügenwalder mühlen frikadellen",
+    "marke": "Rügenwalder",
+    "produkt": "Mühlen Frikadellen"
+  },
+  {
+    "datei": "billie-green-burger",
+    "suche": "billie green burger rewe",
+    "marke": "Billie Green",
+    "produkt": "Green Burger"
+  },
+  {
+    "datei": "oatly-barista",
+    "barcode": "7394376620164",
+    "suche": "oatly barista edition",
+    "marke": "Oatly",
+    "produkt": "Haferdrink Barista Edition"
+  },
+  {
+    "datei": "alpro-haferdrink",
+    "suche": "alpro haferdrink original",
+    "marke": "Alpro",
+    "produkt": "Haferdrink Original"
+  },
+  {
+    "datei": "violife-original",
+    "suche": "violife original scheiben",
+    "marke": "Violife",
+    "produkt": "Original Scheiben"
+  },
+  {
+    "datei": "beyond-burger",
+    "barcode": "8719336000571",
+    "suche": "beyond meat beyond burger",
+    "marke": "Beyond Meat",
+    "produkt": "Beyond Burger"
+  },
+  {
+    "datei": "like-meat-chicken",
+    "suche": "like meat like chicken",
+    "marke": "Like Meat",
+    "produkt": "Like Chicken"
+  },
+  {
+    "datei": "garden-gourmet-burger",
+    "suche": "garden gourmet sensational burger",
+    "marke": "Garden Gourmet",
+    "produkt": "Sensational Burger"
+  },
+  {
+    "datei": "no-meat-factory-burger",
+    "suche": "no meat factory burger",
+    "marke": "No Meat Factory",
+    "produkt": "Smash Burger"
+  },
+  {
+    "datei": "vemondo-burger",
+    "suche": "vemondo burger patties lidl",
+    "marke": "Vemondo",
+    "produkt": "Vegane Burger Patties"
+  },
+  {
+    "datei": "myvay-nuggets",
+    "suche": "myvay chicken nuggets aldi",
+    "marke": "MyVay",
+    "produkt": "Vegane Chicken Nuggets"
+  },
+  {
+    "datei": "simply-v-scheiben",
+    "suche": "simply v vegane scheiben",
+    "marke": "Simply V",
+    "produkt": "Vegane Scheiben"
+  },
+  {
+    "datei": "vegetarian-butcher-hack",
+    "suche": "vegetarian butcher sensational hack",
+    "marke": "The Vegetarian Butcher",
+    "produkt": "Sensational Hack"
+  },
+  {
+    "datei": "planted-chicken",
+    "suche": "planted chicken natur",
+    "marke": "Planted",
+    "produkt": "Planted Chicken Natur"
+  },
+  {
+    "datei": "next-level-burger",
+    "suche": "next level burger lidl",
+    "marke": "Next Level",
+    "produkt": "Next Level Burger"
+  },
+  {
+    "datei": "tofutown-raeuchertofu",
+    "suche": "tofutown räuchertofu",
+    "marke": "Tofutown",
+    "produkt": "Räuchertofu"
+  },
+  {
+    "datei": "naturli-hack",
+    "suche": "naturli veggie hack",
+    "marke": "Naturli",
+    "produkt": "Veggie Hack"
+  },
+  {
+    "datei": "endori-gyros",
+    "suche": "endori green heroes gyros",
+    "marke": "Endori",
+    "produkt": "Green Heroes Gyros"
+  },
+  {
+    "datei": "happy-cheeze-camembert",
+    "suche": "happy cheeze camembert",
+    "marke": "Happy Cheeze",
+    "produkt": "Camembert Style"
+  }
+]

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <rect width="300" height="300" fill="#f5f0e8"/>
+  <rect x="50" y="70" width="200" height="160" rx="8" fill="#ffffff" stroke="#c41e3a" stroke-width="4"/>
+  <rect x="65" y="85" width="170" height="30" rx="4" fill="#c41e3a"/>
+  <text x="150" y="106" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="#ffffff">RÜGENWALDER</text>
+  <text x="150" y="145" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#333">Vegetarische</text>
+  <text x="150" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="bold" fill="#c41e3a">BRATWURST</text>
+  <ellipse cx="150" cy="200" rx="70" ry="18" fill="#d4a060"/>
+  <ellipse cx="150" cy="200" rx="55" ry="12" fill="#c48840"/>
+</svg>

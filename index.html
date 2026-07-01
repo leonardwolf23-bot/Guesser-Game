@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Substitutle – Ersatzprodukt erraten</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Substitutle 🌱</h1>
+      <p class="subtitle">Welche Marke? Welches Produkt?</p>
+      <p class="puzzle-number" id="puzzle-number"></p>
+    </header>
+
+    <main>
+      <div class="image-box">
+        <canvas id="game-canvas" width="300" height="300"></canvas>
+        <p class="hint" id="stage-hint">Start: kaum Farbe, sehr verpixelt</p>
+      </div>
+
+      <form id="guess-form">
+        <label>
+          Marke
+          <input type="text" id="brand-input" placeholder="z.B. Oatly" autocomplete="off" list="brand-list">
+        </label>
+        <label>
+          Produkt
+          <input type="text" id="product-input" placeholder="z.B. Haferdrink Barista" autocomplete="off" list="product-list">
+        </label>
+        <button type="submit" id="guess-btn">Raten</button>
+      </form>
+
+      <datalist id="brand-list"></datalist>
+      <datalist id="product-list"></datalist>
+
+      <div class="attempts" id="attempts"></div>
+      <p class="message" id="message"></p>
+
+      <div class="share-box hidden" id="share-box">
+        <button type="button" id="share-btn">Ergebnis kopieren</button>
+      </div>
+
+      <div class="action-box">
+        <button type="button" id="replay-btn" class="btn-secondary">Nochmal spielen</button>
+        <button type="button" id="practice-btn" class="btn-secondary">Zufälliges Übungsrätsel</button>
+      </div>
+    </main>
+
+    <footer>
+      <p>Neues Tagesrätsel jeden Tag · <span id="attempts-left"></span></p>
+    </footer>
+  </div>
+
+  <!-- Produkte hier bearbeiten: js/products.js -->
+  <script src="js/products.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
