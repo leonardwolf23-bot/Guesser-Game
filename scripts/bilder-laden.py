@@ -105,13 +105,16 @@ def search_product(query: str, country: str = "germany") -> dict | None:
             return product
 
     return None
+
+
+def slugify(text: str) -> str:
     text = text.lower()
     text = text.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
     text = re.sub(r"[^a-z0-9]+", "-", text)
     return text.strip("-")[:60] or "produkt"
 
 
-def slugify(text: str) -> str:
+def get_image_url(product: dict) -> str | None:
     url = product.get("image_front_url") or product.get("image_url")
     if not url:
         return None
@@ -281,12 +284,12 @@ def bulk_download(count: int, delay: float = 1.0) -> list[dict]:
 
 
 def print_products_js_snippet(results: list[dict]) -> None:
-  ok = [r for r in results if r.get("status") == "ok"]
-  if not ok:
-    return
-  print("\n--- Kopieren für js/products.js (image-Zeilen) ---")
-  for item in ok:
-    print(f'{item["marke"]} / {item["produkt"]}: image: "{item["image"]}",')
+    ok = [r for r in results if r.get("status") == "ok"]
+    if not ok:
+        return
+    print("\n--- Kopieren für js/products.js (image-Zeilen) ---")
+    for item in ok:
+        print(f'{item["marke"]} / {item["produkt"]}: image: "{item["image"]}",')
 
 
 def main() -> int:
