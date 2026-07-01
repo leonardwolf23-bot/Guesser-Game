@@ -43,24 +43,22 @@ image: "images/oatly-barista.jpg",
 
 ---
 
-## Variante 2: Viele Produkte auf einmal (z.B. 100)
+## Variante 2: Viele Ersatzprodukte auf einmal (z.B. 100)
 
 ```powershell
 python scripts/bilder-laden.py --bulk 100
 ```
 
-- Lädt **100 vegane Produkte** aus Deutschland
+- Lädt nur **Ersatzprodukte**: Fleischersatz, Milchalternativen, veganer Käse, Tofu/Seitan …
+- **Kein** Toastbrot, Schokolade, Nüsse oder zufällig veganes Zeug
 - Speichert Bilder als `images/bulk-....jpg`
 - Erstellt `scripts/bulk-produkte.json` mit allen Einträgen
-- Diese Einträge kannst du in `js/products.js` kopieren
 
-Für **1000 Produkte**:
+Für **1000 Ersatzprodukte**:
 
 ```powershell
 python scripts/bilder-laden.py --bulk 1000
 ```
-
-Das dauert eine Weile (ca. 15–30 Min.), weil zwischen Anfragen pausiert wird.
 
 ---
 

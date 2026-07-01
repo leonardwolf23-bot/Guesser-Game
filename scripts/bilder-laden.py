@@ -11,7 +11,7 @@ Installation (einmalig):
 Standard (20 Produkte aus produkte-quelle.json):
     python scripts/bilder-laden.py
 
-Viele Produkte auf einmal (z.B. 100 vegane aus Deutschland):
+Viele Ersatzprodukte auf einmal (z.B. 100 – nur Fleisch-/Milch-/Käseersatz):
     python scripts/bilder-laden.py --bulk 100
 
 Hilfe:
@@ -40,6 +40,62 @@ USER_AGENT = "SubstitutleGame/1.0 (https://github.com/leonardwolf23-bot/Guesser-
 SEARCH_URL = "https://world.openfoodfacts.org/cgi/search.pl"
 PRODUCT_URL = "https://world.openfoodfacts.org/api/v2/product/{barcode}.json"
 MAX_RETRIES = 4
+
+# Open-Food-Facts-Kategorien für Ersatzprodukte
+ERSATZ_CATEGORIES = [
+    "meat-alternatives",
+    "plant-based-meat-alternatives",
+    "vegetarian-meat-alternatives",
+    "vegan-cheese",
+    "cheese-substitutes",
+    "plant-based-cheese",
+    "milk-substitutes",
+    "plant-based-milk-alternatives",
+    "dairy-substitutes",
+    "fish-alternatives",
+    "egg-substitutes",
+]
+
+# Bekannte Ersatzprodukt-Marken (Deutschland)
+KNOWN_SUBSTITUTE_BRANDS = [
+    "oatly", "alpro", "violife", "beyond meat", "like meat", "rügenwalder", "ruegenwalder",
+    "garden gourmet", "no meat factory", "vemondo", "myvay", "billie green", "simply v",
+    "planted", "next level", "tofutown", "taifun", "naturli", "endori", "happy cheeze",
+    "vegetarian butcher", "quorn", "berief", "sojade", "provamel", "joya", "valsoia",
+    "greenforce", "meatless farm", "iglo green cuisine", "frosta veggie love",
+    "rewe beste wahl", "k-take it veggie", "bio zentrale", "dennree",
+]
+
+# Produktname muss oft so etwas enthalten (Ersatz für tierisches)
+ERSATZ_NAME_KEYWORDS = [
+    "burger", "patty", "patties", "hack", "wurst", "bratwurst", "nugget", "nuggets",
+    "schnitzel", "cordon bleu", "gyros", "kebab", "döner", "speck", "schinken",
+    "salami", "mortadella", "leberwurst", "chicken", "hähnchen", "haehnchen",
+    "pulled", "mince", "gehack", "frikadelle", "filet", "streifen", "geschnetzel",
+    "haferdrink", "hafermilch", "sojadrink", "sojamilch", "mandeldrink", "reisdrink",
+    "kokosdrink", "pflanzendrink", "barista", "milchalternative", "drink",
+    "käse", "kaese", "cheeze", "cheese", "scheiben", "camembert", "mozzarella",
+    "feta", "gouda", "cheddar", "aufstrich", "räuchertofu", "raeuchertofu",
+    "seitan", "tempeh", "tofu", "fish", "fisch", "lachs", "thunfisch",
+]
+
+# Das soll NICHT reingezogen werden (auch wenn vegan)
+EXCLUDE_KEYWORDS = [
+    "brot", "bread", "toast", "brötchen", "broetchen", "bagel", "croissant",
+    "schokolade", "chocolate", "kakao", "cocoa", "riegel", "protein bar", "energy bar", "keks", "cookie",
+    "müsli", "muesli", "cereal", "cornflakes", "granola",
+    "chips", "popcorn", "crackers", "gebäck", "gebaeck", "kuchen", "cake",
+    "marmelade", "jam", "honig", "nutella", "aufstrich erdbeer", "peanut butter",
+    "nuss", "nut", "mandeln", "cashew", "walnuss", "haselnuss",
+    "reis", "rice", "nudeln", "pasta", "spaghetti", "penne", "lasagne",
+    "mehl", "flour", "zucker", "sugar", "salz", "salt", "gewürz", "gewuerz",
+    "saft", "juice", "cola", "limo", "wasser", "water", "bier", "wine", "wein",
+    "suppe", "soup", "sauce soja", "sojasauce", "ketchup", "mayo", "senf",
+    "öl", "oil", "essig", "vinegar", "hummus", "dip",
+    "pizza", "frozen vegetable", "gemüse", "gemuese", "brokkoli", "spinat",
+    "linsen", "lentil", "bohnen", "beans", "kichererbsen", "chickpea",
+    "protein riegel", "energy bar", "pulver", "powder", "supplement",
+]
 
 
 def api_get(url: str, params: dict | None = None) -> requests.Response:
@@ -105,6 +161,43 @@ def search_product(query: str, country: str = "germany") -> dict | None:
             return product
 
     return None
+
+
+def normalize_text(text: str) -> str:
+    text = text.lower()
+    text = text.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
+    return text
+
+
+def is_ersatzprodukt(product: dict) -> bool:
+    """Nur echte Ersatzprodukte – kein zufällig veganes Toastbrot etc."""
+    categories = " ".join(product.get("categories_tags") or [])
+    name = product.get("product_name") or ""
+    brands = product.get("brands") or ""
+    combined = normalize_text(f"{categories} {name} {brands}")
+
+    if any(word in combined for word in EXCLUDE_KEYWORDS):
+        return False
+
+    # OFF-Kategorie ist Ersatzprodukt
+    if any(cat.replace("-", " ") in combined or cat in combined for cat in ERSATZ_CATEGORIES):
+        return True
+
+    # Bekannte Ersatzmarke
+    if any(brand in combined for brand in KNOWN_SUBSTITUTE_BRANDS):
+        return True
+
+    # Produktname klingt nach Ersatz
+    if any(keyword in combined for keyword in ERSATZ_NAME_KEYWORDS):
+        # „drink“ allein ist zu breit – nur mit pflanzlichem Kontext
+        if "drink" in combined and not any(
+            w in combined
+            for w in ("hafer", "soja", "mandel", "reis", "kokos", "pflanzen", "barista", "oat", "almond")
+        ):
+            return False
+        return True
+
+    return False
 
 
 def slugify(text: str) -> str:
@@ -200,84 +293,96 @@ def download_from_source_list(delay: float = 1.0) -> list[dict]:
 
 
 def bulk_download(count: int, delay: float = 1.0) -> list[dict]:
-    """Lädt viele vegane Produkte aus Deutschland."""
-    print(f"Suche {count} vegane Produkte aus Deutschland …\n")
+    """Lädt Ersatzprodukte aus Deutschland (Fleisch-, Milch-, Käseersatz …)."""
+    print(f"Suche {count} Ersatzprodukte aus Deutschland …")
+    print("(Kein Toastbrot, keine Schokolade – nur tierische Produktalternativen)\n")
 
     collected: list[dict] = []
-    page = 1
-    page_size = min(50, count)
+    seen_barcodes: set[str] = set()
+    page_size = 50
 
-    while len(collected) < count:
-        params = {
-            "action": "process",
-            "json": 1,
-            "page": page,
-            "page_size": page_size,
-            "tagtype_0": "labels",
-            "tag_contains_0": "contains",
-            "tag_0": "vegan",
-            "tagtype_1": "countries",
-            "tag_contains_1": "contains",
-            "tag_1": "germany",
-            "fields": "product_name,brands,code,image_front_url,image_url,categories_tags",
-        }
-
-        response = api_get(SEARCH_URL, params=params)
-        data = response.json()
-        products = data.get("products", [])
-
-        if not products:
+    for category in ERSATZ_CATEGORIES:
+        if len(collected) >= count:
             break
 
-        for product in products:
-            if len(collected) >= count:
-                break
+        print(f"Kategorie: {category}")
+        page = 1
 
-            image_url = get_image_url(product)
-            brand = (product.get("brands") or "Unbekannt").split(",")[0].strip()
-            name = (product.get("product_name") or "Unbekannt").strip()
-            barcode = product.get("code")
-
-            if not image_url or not barcode:
-                continue
-
-            # Fleischersatz & Milchalternativen bevorzugen
-            categories = " ".join(product.get("categories_tags") or [])
-            keywords = (
-                "meat", "burger", "hack", "wurst", "chicken", "cheese", "milk",
-                "drink", "oat", "tofu", "plant", "vegan", "nugget", "patty",
-            )
-            if not any(k in categories for k in keywords):
-                continue
-
-            file_slug = slugify(f"{brand}-{name}")
-            output = IMAGES_DIR / f"bulk-{file_slug}.jpg"
-
-            if output.exists():
-                continue
+        while len(collected) < count:
+            params = {
+                "action": "process",
+                "json": 1,
+                "page": page,
+                "page_size": page_size,
+                "tagtype_0": "categories",
+                "tag_contains_0": "contains",
+                "tag_0": category,
+                "tagtype_1": "countries",
+                "tag_contains_1": "contains",
+                "tag_1": "germany",
+                "fields": "product_name,brands,code,image_front_url,image_url,categories_tags",
+            }
 
             try:
-                download_and_resize(image_url, output)
-                entry = {
-                    "brand": brand,
-                    "product": name,
-                    "image": f"images/{output.name}",
-                    "barcode": barcode,
-                    "aliases": {"brand": [brand.lower()], "product": [name.lower()]},
-                }
-                collected.append(entry)
-                print(f"[{len(collected)}/{count}] {brand} – {name}")
-            except Exception as error:
+                response = api_get(SEARCH_URL, params=params)
+                data = response.json()
+            except requests.RequestException as error:
                 print(f"  Übersprungen ({error})")
+                break
 
-            time.sleep(delay)
+            products = data.get("products", [])
+            if not products:
+                break
 
-        page += 1
+            for product in products:
+                if len(collected) >= count:
+                    break
+
+                barcode = product.get("code")
+                if not barcode or barcode in seen_barcodes:
+                    continue
+
+                if not is_ersatzprodukt(product):
+                    continue
+
+                image_url = get_image_url(product)
+                if not image_url:
+                    continue
+
+                brand = (product.get("brands") or "Unbekannt").split(",")[0].strip()
+                name = (product.get("product_name") or "Unbekannt").strip()
+
+                file_slug = slugify(f"{brand}-{name}")
+                output = IMAGES_DIR / f"bulk-{file_slug}.jpg"
+
+                if output.exists():
+                    seen_barcodes.add(barcode)
+                    continue
+
+                try:
+                    download_and_resize(image_url, output)
+                    entry = {
+                        "brand": brand,
+                        "product": name,
+                        "image": f"images/{output.name}",
+                        "barcode": barcode,
+                        "category": category,
+                        "aliases": {"brand": [brand.lower()], "product": [name.lower()]},
+                    }
+                    collected.append(entry)
+                    seen_barcodes.add(barcode)
+                    print(f"[{len(collected)}/{count}] {brand} – {name}")
+                except Exception as error:
+                    print(f"  Übersprungen ({error})")
+
+                time.sleep(delay)
+
+            page += 1
 
     with open(BULK_OUTPUT, "w", encoding="utf-8") as f:
         json.dump(collected, f, ensure_ascii=False, indent=2)
 
-    print(f"\nFertig! {len(collected)} Bilder in images/")
+    print(f"\nFertig! {len(collected)} Ersatzprodukt-Bilder in images/")
     print(f"Produktliste: {BULK_OUTPUT}")
     print("Tipp: Einträge aus bulk-produkte.json in js/products.js kopieren.")
     return collected
@@ -298,7 +403,7 @@ def main() -> int:
         "--bulk",
         type=int,
         metavar="N",
-        help="N vegane Produkte aus Deutschland automatisch laden (z.B. 100)",
+        help="N Ersatzprodukte aus Deutschland laden (nur Fleisch/Milch/Käse-Ersatz)",
     )
     parser.add_argument(
         "--delay",
