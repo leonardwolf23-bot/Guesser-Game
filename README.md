@@ -46,6 +46,21 @@ Substitutle/
 
 ---
 
+## Bilder automatisch laden (empfohlen!)
+
+**Nicht selbst fotografieren** – Bilder kommen aus [Open Food Facts](https://de.openfoodfacts.org):
+
+```powershell
+pip install -r requirements.txt
+python scripts/bilder-laden.py
+```
+
+Für viele Produkte auf einmal: `python scripts/bilder-laden.py --bulk 100`
+
+Ausführliche Anleitung: [`scripts/BILDER-AUTOMATISCH.md`](scripts/BILDER-AUTOMATISCH.md)
+
+---
+
 ## Bilder einfügen
 
 **Vollständige Liste aller 20 Produkte:** siehe [`images/BILDER-LISTE.md`](images/BILDER-LISTE.md)
