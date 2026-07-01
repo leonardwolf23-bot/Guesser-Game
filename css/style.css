@@ -174,6 +174,23 @@ button:disabled {
   display: none;
 }
 
+.action-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #3d5a32;
+  border: 2px solid #c8d9bc;
+}
+
+.btn-secondary:hover {
+  background: #eef4e8;
+}
+
 footer {
   text-align: center;
   font-size: 0.85rem;

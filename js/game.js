@@ -25,13 +25,16 @@ const puzzleNumberEl = document.getElementById("puzzle-number");
 const attemptsLeftEl = document.getElementById("attempts-left");
 const shareBox = document.getElementById("share-box");
 const shareBtn = document.getElementById("share-btn");
+const replayBtn = document.getElementById("replay-btn");
+const practiceBtn = document.getElementById("practice-btn");
 
 let productImage = new Image();
-let todaysProduct = null;
+let currentProduct = null;
 let puzzleNumber = 0;
 let attemptCount = 0;
 let gameOver = false;
 let guessHistory = [];
+let gameMode = "daily"; // "daily" oder "practice"
 
 function normalize(text) {
   return text
@@ -58,18 +61,28 @@ function getTodaysProduct() {
 }
 
 function storageKey() {
+  if (gameMode === "practice") return null;
   return `substitutle-${puzzleNumber}`;
 }
 
+function getRandomProduct() {
+  const index = Math.floor(Math.random() * PRODUCTS.length);
+  return PRODUCTS[index];
+}
+
 function saveState() {
+  const key = storageKey();
+  if (!key) return;
   localStorage.setItem(
-    storageKey(),
+    key,
     JSON.stringify({ attemptCount, gameOver, guessHistory })
   );
 }
 
 function loadState() {
-  const raw = localStorage.getItem(storageKey());
+  const key = storageKey();
+  if (!key) return;
+  const raw = localStorage.getItem(key);
   if (!raw) return;
   try {
     const data = JSON.parse(raw);
@@ -79,6 +92,89 @@ function loadState() {
   } catch {
     // Alte/kaputte Daten ignorieren
   }
+}
+
+function clearSavedState() {
+  const key = storageKey();
+  if (key) localStorage.removeItem(key);
+}
+
+function updatePuzzleLabel() {
+  if (gameMode === "practice") {
+    puzzleNumberEl.textContent = "Übungsrätsel (zufällig)";
+    return;
+  }
+  puzzleNumberEl.textContent = `Tagesrätsel #${puzzleNumber}`;
+}
+
+function resetGameState() {
+  attemptCount = 0;
+  gameOver = false;
+  guessHistory = [];
+  messageEl.textContent = "";
+  messageEl.className = "message";
+  shareBox.classList.add("hidden");
+  guessBtn.disabled = false;
+  brandInput.disabled = false;
+  productInput.disabled = false;
+  brandInput.value = "";
+  productInput.value = "";
+  renderAttempts();
+  updateAttemptsLeft();
+}
+
+function startDailyGame() {
+  gameMode = "daily";
+  currentProduct = getTodaysProduct();
+  updatePuzzleLabel();
+  resetGameState();
+  loadState();
+  renderAttempts();
+  updateAttemptsLeft();
+  loadProductImage();
+}
+
+function startPracticeGame() {
+  gameMode = "practice";
+  currentProduct = getRandomProduct();
+  updatePuzzleLabel();
+  resetGameState();
+  loadProductImage();
+}
+
+function loadProductImage() {
+  productImage = new Image();
+  productImage.onload = () => {
+    drawStage(attemptCount);
+    if (gameOver) showEndState();
+  };
+  productImage.onerror = () => {
+    messageEl.textContent = `Bild nicht gefunden: ${currentProduct.image}`;
+    messageEl.className = "message lose";
+  };
+  productImage.src = currentProduct.image;
+}
+
+function showEndState() {
+  guessBtn.disabled = true;
+  brandInput.disabled = true;
+  productInput.disabled = true;
+  shareBox.classList.remove("hidden");
+  drawStage(STAGES.length - 1);
+
+  const won = guessHistory.some(
+    (g) => g.brandResult === "correct" && g.productResult === "correct"
+  );
+
+  if (won) {
+    messageEl.textContent = `Richtig! 🎉 ${currentProduct.brand} – ${currentProduct.product}`;
+    messageEl.className = "message win";
+  } else if (guessHistory.length > 0) {
+    messageEl.textContent = `Es war: ${currentProduct.brand} – ${currentProduct.product}`;
+    messageEl.className = "message lose";
+  }
+
+  updateAttemptsLeft();
 }
 
 function matchesBrand(guess, product) {
@@ -161,9 +257,15 @@ function escapeHtml(text) {
 
 function updateAttemptsLeft() {
   const left = MAX_ATTEMPTS - attemptCount;
-  attemptsLeftEl.textContent = gameOver
-    ? "Morgen gibt es ein neues Rätsel"
-    : `${left} Versuch${left === 1 ? "" : "e"} übrig`;
+  if (gameOver && gameMode === "daily") {
+    attemptsLeftEl.textContent = "Morgen gibt es ein neues Tagesrätsel";
+    return;
+  }
+  if (gameOver && gameMode === "practice") {
+    attemptsLeftEl.textContent = "Klick auf „Zufälliges Übungsrätsel“ für ein neues";
+    return;
+  }
+  attemptsLeftEl.textContent = `${left} Versuch${left === 1 ? "" : "e"} übrig`;
 }
 
 function endGame(won) {
@@ -174,10 +276,10 @@ function endGame(won) {
   drawStage(STAGES.length - 1);
 
   if (won) {
-    messageEl.textContent = `Richtig! 🎉 ${todaysProduct.brand} – ${todaysProduct.product}`;
+    messageEl.textContent = `Richtig! 🎉 ${currentProduct.brand} – ${currentProduct.product}`;
     messageEl.className = "message win";
   } else {
-    messageEl.textContent = `Leider nein. Es war: ${todaysProduct.brand} – ${todaysProduct.product}`;
+    messageEl.textContent = `Leider nein. Es war: ${currentProduct.brand} – ${currentProduct.product}`;
     messageEl.className = "message lose";
   }
 
@@ -215,8 +317,8 @@ function handleGuess(event) {
     return;
   }
 
-  const brandOk = matchesBrand(brand, todaysProduct);
-  const productOk = matchesProduct(product, todaysProduct);
+  const brandOk = matchesBrand(brand, currentProduct);
+  const productOk = matchesProduct(product, currentProduct);
 
   guessHistory.push({
     brand,
@@ -260,41 +362,26 @@ function init() {
     return;
   }
 
-  todaysProduct = getTodaysProduct();
-  puzzleNumberEl.textContent = `Rätsel #${puzzleNumber}`;
   fillDatalists();
-  loadState();
-  renderAttempts();
-  updateAttemptsLeft();
-
-  productImage.onload = () => {
-    drawStage(attemptCount);
-    if (gameOver) {
-      guessBtn.disabled = true;
-      brandInput.disabled = true;
-      productInput.disabled = true;
-      shareBox.classList.remove("hidden");
-      const won = guessHistory.some(
-        (g) => g.brandResult === "correct" && g.productResult === "correct"
-      );
-      if (won) {
-        messageEl.textContent = `Richtig! 🎉 ${todaysProduct.brand} – ${todaysProduct.product}`;
-        messageEl.className = "message win";
-      } else if (guessHistory.length > 0) {
-        messageEl.textContent = `Es war: ${todaysProduct.brand} – ${todaysProduct.product}`;
-        messageEl.className = "message lose";
-      }
-    }
-  };
-
-  productImage.onerror = () => {
-    messageEl.textContent = `Bild nicht gefunden: ${todaysProduct.image}`;
-    messageEl.className = "message lose";
-  };
-
-  productImage.src = todaysProduct.image;
+  startDailyGame();
 
   guessForm.addEventListener("submit", handleGuess);
+
+  replayBtn.addEventListener("click", () => {
+    if (gameMode === "practice") {
+      startPracticeGame();
+      return;
+    }
+    clearSavedState();
+    resetGameState();
+    drawStage(0);
+    brandInput.focus();
+  });
+
+  practiceBtn.addEventListener("click", () => {
+    startPracticeGame();
+    brandInput.focus();
+  });
 
   shareBtn.addEventListener("click", async () => {
     const text = buildShareText();

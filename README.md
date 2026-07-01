@@ -103,6 +103,15 @@ Fertig. Das neue Produkt ist automatisch im Pool für die täglichen Rätsel.
 
 ---
 
+## Nochmal spielen
+
+Nach dem Spielen gibt es zwei Buttons:
+
+- **Nochmal spielen** — startet das heutige Tagesrätsel von vorne
+- **Zufälliges Übungsrätsel** — neues Produkt, so oft du willst (zum Üben)
+
+---
+
 ## Anpassungen
 
 | Was ändern? | Wo? |
