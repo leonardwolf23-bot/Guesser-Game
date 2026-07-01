@@ -46,6 +46,19 @@ Substitutle/
 
 ---
 
+## Bilder einfügen
+
+**Vollständige Liste aller 20 Produkte:** siehe [`images/BILDER-LISTE.md`](images/BILDER-LISTE.md)
+
+Kurzversion:
+1. Foto (300×300 px) in `images/` speichern
+2. In `js/products.js` den `image`-Pfad anpassen
+3. Browser neu laden
+
+Enthalten sind u.a. Rügenwalder, Billie Green (REWE), Vemondo (Lidl), MyVay (Aldi), Oatly, Beyond Meat, Like Meat, Garden Gourmet, Planted, Simply V und mehr.
+
+---
+
 ## Neues Produkt hinzufügen (3 Schritte)
 
 ### 1. Bild besorgen
